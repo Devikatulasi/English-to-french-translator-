@@ -18,9 +18,17 @@ def logits_to_text(logits, tokenizer):
 
 
 def translate_text(text):
+    # Tokenize the input sentence and check if all words exist in the tokenizer
+    unknown_words = [word for word in text.split() if word not in english_tokenizer.word_index]
+
+    if unknown_words:
+        return f"The following word(s) are not in the dataset: {', '.join(unknown_words)}"
+
+    # Proceed with translation if all words exist
     sentence = [english_tokenizer.word_index.get(word, 0) for word in text.split()]
     sentence = pad_sequences([sentence], maxlen=translation_model.input_shape[1], padding='post')
     translation = logits_to_text(translation_model.predict(sentence[:1])[0], french_tokenizer)
+
     return translation
 
 @app.route('/', methods=['GET', 'POST'])
